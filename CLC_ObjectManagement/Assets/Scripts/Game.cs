@@ -1,13 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+// using System.IO;
 using UnityEngine;
 
-
-public class Game : MonoBehaviour
+// 물체의 생성에만 관여. 저장/로드는 Persistable Object. cs가 담당
+public class Game : PersistableObject
 {
     // 소환할 물체의 정보
-    public Transform prefab;
+    // public Transform prefab;
+    public PersistableObject prefab;
 
     // 물체 생성에 해당하는 키 코드
     public KeyCode createKey = KeyCode.C;
@@ -22,16 +23,18 @@ public class Game : MonoBehaviour
     public KeyCode loadKey = KeyCode.L;
 
     // 생성한 물체를 저장할 배열
-    List<Transform> objects;
+    // List<Transform> objects;
+    List<PersistableObject> objects;
 
     // transform 정보를 저장할 위치
-    string savePath;
+    // string savePath;
+    public PersistableStorage storage;
 
     private void Awake()
     {
-        objects = new List<Transform>();
+        objects = new List<PersistableObject>();
         // persistent Data Path는 'file'이 아니라 'folder' 경로이다
-        savePath = Path.Combine(Application.persistentDataPath, "saveFile");
+        // savePath = Path.Combine(Application.persistentDataPath, "saveFile");
     }
 
     private void Update()
@@ -48,18 +51,23 @@ public class Game : MonoBehaviour
         }
         else if(Input.GetKeyDown(saveKey))
         {
-            Save();
+            // Save();
+            storage.Save(this);
         }
         else if(Input.GetKeyDown(loadKey))
         {
-            Load();
+            // Load();
+            BeginNewGame();
+            storage.Load(this);
         }
     }
 
     // 물체를 임의의 지점에 생성하는 메소드
     void CreateObject()
     {
-        Transform t = Instantiate(prefab);
+        // Transform t = Instantiate(prefab);
+        PersistableObject o = Instantiate(prefab);
+        Transform t = o.transform;
 
         // 반지름이 1인 구 범위 내. 5를 곱해 범위를 넓힘
         t.localPosition = Random.insideUnitSphere * 5f;
@@ -69,7 +77,7 @@ public class Game : MonoBehaviour
         t.localScale = Vector3.one * Random.Range(0.1f, 1f);
 
         // 배열에 추가
-        objects.Add(t);
+        objects.Add(o);
     }
 
     // 다시 게임을 시작(Clear 용도)
@@ -86,6 +94,28 @@ public class Game : MonoBehaviour
         objects.Clear();
     }
 
+    public override void Save(GameDataWriter writer)
+    {
+        // 배열의 길이를 기록
+        writer.Write(objects.Count);
+        for(int i=0; i < objects.Count; i++)
+        {
+            objects[i].Save(writer);
+        }
+    }
+
+    public override void Load(GameDataReader reader)
+    {
+        int count = reader.ReadInt();
+        for(int i=0; i < count; i++)
+        {
+            PersistableObject o = Instantiate(prefab);
+            o.Load(reader);
+            objects.Add(o);
+        }
+    }
+
+    /*
     void Save()
     {
         // 내용 기록을 위한 open
@@ -135,4 +165,5 @@ public class Game : MonoBehaviour
             }
         }
     }
+    */
 }

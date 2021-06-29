@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class PersistableStorage : MonoBehaviour
 {
+    // 저장 경로
     string savePath;
 
     private void Awake()

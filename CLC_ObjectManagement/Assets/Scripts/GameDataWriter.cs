@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class GameDataWriter : MonoBehaviour
+public class GameDataWriter
 {
     BinaryWriter writer;
 

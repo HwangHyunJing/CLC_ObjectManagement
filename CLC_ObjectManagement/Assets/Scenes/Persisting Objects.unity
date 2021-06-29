@@ -368,12 +368,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8af33bdb9634c2d48b02604f046f6680, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab: {fileID: 0}
+  prefab: {fileID: -8661914429643500474, guid: dc40d40188ed7fc4ba4454181f50a4b8, type: 3}
   createKey: 99
   newGameKey: 110
   saveKey: 115
   loadKey: 108
-  storage: {fileID: 0}
+  storage: {fileID: 1004552187}
 --- !u!4 &1890919058
 Transform:
   m_ObjectHideFlags: 0

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class GameDataReader : MonoBehaviour
+public class GameDataReader
 {
     BinaryReader reader;
 

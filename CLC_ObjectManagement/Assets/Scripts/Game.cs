@@ -8,7 +8,9 @@ public class Game : PersistableObject
 {
     // 소환할 물체의 정보
     // public Transform prefab;
-    public PersistableObject prefab;
+    // public PersistableObject prefab;
+    // 이제 PersistableObject형 prefab류 대신, ShapeFactory형 shapes를 사용
+    public ShapeFactory shapeFactory;
 
     // 물체 생성에 해당하는 키 코드
     public KeyCode createKey = KeyCode.C;
@@ -24,7 +26,7 @@ public class Game : PersistableObject
 
     // 생성한 물체를 저장할 배열
     // List<Transform> objects;
-    List<PersistableObject> objects;
+    List<Shape> shapes;
 
     // transform 정보를 저장할 위치
     // string savePath;
@@ -32,7 +34,7 @@ public class Game : PersistableObject
 
     private void Awake()
     {
-        objects = new List<PersistableObject>();
+        shapes = new List<Shape>();
         // persistent Data Path는 'file'이 아니라 'folder' 경로이다
         // savePath = Path.Combine(Application.persistentDataPath, "saveFile");
     }
@@ -42,7 +44,8 @@ public class Game : PersistableObject
         if(Input.GetKeyDown(createKey))
         {
             // Instantiate(prefab);
-            CreateObject();
+            // CreateObject();
+            CreateShape();
         }
         // 한 번에 여러 키가 입력되는 것을 막기 위해 else-if 구문으로 묶음
         else if(Input.GetKeyDown(newGameKey))
@@ -63,11 +66,13 @@ public class Game : PersistableObject
     }
 
     // 물체를 임의의 지점에 생성하는 메소드
-    void CreateObject()
+    // 의미를 확실하게 하기 위해 o 대신 instance로 단어를 변화
+    void CreateShape()
     {
         // Transform t = Instantiate(prefab);
-        PersistableObject o = Instantiate(prefab);
-        Transform t = o.transform;
+        // PersistableObject o = Instantiate(prefab);
+        Shape instance = shapeFactory.GetRandom();
+        Transform t = instance.transform;
 
         // 반지름이 1인 구 범위 내. 5를 곱해 범위를 넓힘
         t.localPosition = Random.insideUnitSphere * 5f;
@@ -77,41 +82,47 @@ public class Game : PersistableObject
         t.localScale = Vector3.one * Random.Range(0.1f, 1f);
 
         // 배열에 추가
-        objects.Add(o);
+        // objects.Add(o);
+        shapes.Add(instance);
     }
 
+    // objects -> shapes
     // 다시 게임을 시작(Clear 용도)
     void BeginNewGame()
     {
         // Debug.Log("New Game Starts");
-        for(int i=0; i < objects.Count; i++)
+        for(int i=0; i < shapes.Count; i++)
         {
             // 일단 물체를 제거
-            Destroy(objects[i].gameObject);
+            Destroy(shapes[i].gameObject);
         }
 
         // 배열의 내용은 한번에 정리
-        objects.Clear();
+        shapes.Clear();
     }
+
+    // objects -> shapes
 
     public override void Save(GameDataWriter writer)
     {
         // 배열의 길이를 기록
-        writer.Write(objects.Count);
-        for(int i=0; i < objects.Count; i++)
+        writer.Write(shapes.Count);
+        for(int i=0; i < shapes.Count; i++)
         {
-            objects[i].Save(writer);
+            shapes[i].Save(writer);
         }
     }
+
+    // objects -> shapes
 
     public override void Load(GameDataReader reader)
     {
         int count = reader.ReadInt();
         for(int i=0; i < count; i++)
         {
-            PersistableObject o = Instantiate(prefab);
+            Shape o = shapeFactory.GetRandom();
             o.Load(reader);
-            objects.Add(o);
+            shapes.Add(o);
         }
     }
 

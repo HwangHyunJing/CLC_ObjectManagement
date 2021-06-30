@@ -7,8 +7,6 @@ using UnityEngine;
 public class Game : PersistableObject
 {
     // 소환할 물체의 정보
-    // public Transform prefab;
-    // public PersistableObject prefab;
     // 이제 PersistableObject형 prefab류 대신, ShapeFactory형 shapes를 사용
     public ShapeFactory shapeFactory;
 
@@ -29,14 +27,15 @@ public class Game : PersistableObject
     List<Shape> shapes;
 
     // transform 정보를 저장할 위치
-    // string savePath;
     public PersistableStorage storage;
+
+    // 저장 버전
+    const int saveVersion = 1;
 
     private void Awake()
     {
         shapes = new List<Shape>();
         // persistent Data Path는 'file'이 아니라 'folder' 경로이다
-        // savePath = Path.Combine(Application.persistentDataPath, "saveFile");
     }
 
     private void Update()
@@ -105,10 +104,14 @@ public class Game : PersistableObject
 
     public override void Save(GameDataWriter writer)
     {
+        // 저장 정보의 버전을 기록
+        writer.Write(-saveVersion);
         // 배열의 길이를 기록
         writer.Write(shapes.Count);
+
         for(int i=0; i < shapes.Count; i++)
         {
+            writer.Write(shapes[i].ShapeId);
             shapes[i].Save(writer);
         }
     }
@@ -117,12 +120,27 @@ public class Game : PersistableObject
 
     public override void Load(GameDataReader reader)
     {
-        int count = reader.ReadInt();
+        // 저장된 정보의 세이브 방식을 읽어옴
+        int version = -reader.ReadInt();
+
+        // version이 count의 정보를 받았다면, 해당 값은 음수가 된다
+        // saveVersion의 초기화값은 1이 되므로, 그 경우 에러를 호출해야 한다
+        if(version > saveVersion)
+        {
+            Debug.LogError("Unsupported future save version " + version);
+            return;
+        }
+
+        // 배열의 길이를 읽어옴
+        int count = version <= 0 ? -version : reader.ReadInt();
+
+
         for(int i=0; i < count; i++)
         {
-            Shape o = shapeFactory.GetRandom();
-            o.Load(reader);
-            shapes.Add(o);
+            int shapeId = reader.ReadInt();
+            Shape instance = shapeFactory.Get(shapeId);
+            instance.Load(reader);
+            shapes.Add(instance);
         }
     }
 

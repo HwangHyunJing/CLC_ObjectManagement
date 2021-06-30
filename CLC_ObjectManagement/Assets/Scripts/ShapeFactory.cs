@@ -12,9 +12,12 @@ public class ShapeFactory : ScriptableObject
     Shape[] prefabs;
 
     // shape id에 해당하는 도형을 가져온다
-    public Shape Get(int shapeID)
+    public Shape Get(int shapeId)
     {
-        return Instantiate(prefabs[shapeID]);
+        // return Instantiate(prefabs[shapeID]);
+        Shape instance = Instantiate(prefabs[shapeId]);
+        instance.ShapeId = shapeId;
+        return instance;
     }
 
     public Shape GetRandom()

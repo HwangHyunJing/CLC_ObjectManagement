@@ -111,7 +111,9 @@ public class Game : PersistableObject
 
         for(int i=0; i < shapes.Count; i++)
         {
+            // 해당 도형의 shape id 정보를 기록
             writer.Write(shapes[i].ShapeId);
+            // writer 인자 정보에 각 shape들의 transform 정보를 넘김
             shapes[i].Save(writer);
         }
     }

@@ -13,13 +13,14 @@ public class PersistableStorage : MonoBehaviour
         savePath = Path.Combine(Application.persistentDataPath, "saveFile");
     }
 
-    public void Save(PersistableObject o)
+    public void Save(PersistableObject o, int version)
     {
         using (
             var writer = new BinaryWriter(File.Open(savePath, FileMode.Create))
             )
         {
-                o.Save(new GameDataWriter(writer));
+            writer.Write(-version);
+            o.Save(new GameDataWriter(writer));
         }
     }
 
@@ -29,7 +30,7 @@ public class PersistableStorage : MonoBehaviour
             var reader = new BinaryReader(File.Open(savePath, FileMode.Open))
             )
         {
-            o.Load(new GameDataReader(reader));
+            o.Load(new GameDataReader(reader, -reader.ReadInt32()));
         }
     }
 }

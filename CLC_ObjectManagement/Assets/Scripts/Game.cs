@@ -54,7 +54,7 @@ public class Game : PersistableObject
         else if(Input.GetKeyDown(saveKey))
         {
             // Save();
-            storage.Save(this);
+            storage.Save(this, saveVersion);
         }
         else if(Input.GetKeyDown(loadKey))
         {
@@ -80,8 +80,10 @@ public class Game : PersistableObject
         // Random. Range는 float를 리턴하기 때문에, transform.scale로 쓰려면 Vector를 곱해야 한다
         t.localScale = Vector3.one * Random.Range(0.1f, 1f);
 
+        // 생성시 임의의 색상을 부여
+        instance.SetColor(Random.ColorHSV(
+            0f, 1f, .5f, 1f, .25f, 1f, 1f, 1f));
         // 배열에 추가
-        // objects.Add(o);
         shapes.Add(instance);
     }
 
@@ -105,7 +107,7 @@ public class Game : PersistableObject
     public override void Save(GameDataWriter writer)
     {
         // 저장 정보의 버전을 기록
-        writer.Write(-saveVersion);
+        // writer.Write(-saveVersion);
         // 배열의 길이를 기록
         writer.Write(shapes.Count);
 
@@ -113,6 +115,7 @@ public class Game : PersistableObject
         {
             // 해당 도형의 shape id 정보를 기록
             writer.Write(shapes[i].ShapeId);
+            writer.Write(shapes[i].MaterialId);
             // writer 인자 정보에 각 shape들의 transform 정보를 넘김
             shapes[i].Save(writer);
         }
@@ -123,7 +126,7 @@ public class Game : PersistableObject
     public override void Load(GameDataReader reader)
     {
         // 저장된 정보의 세이브 방식을 읽어옴
-        int version = -reader.ReadInt();
+        int version = reader.Version;
 
         // version이 count의 정보를 받았다면, 해당 값은 음수가 된다
         // saveVersion의 초기화값은 1이 되므로, 그 경우 에러를 호출해야 한다
@@ -139,8 +142,9 @@ public class Game : PersistableObject
 
         for(int i=0; i < count; i++)
         {
-            int shapeId = reader.ReadInt();
-            Shape instance = shapeFactory.Get(shapeId);
+            int shapeId = version > 0 ? reader.ReadInt() : 0;
+            int materialId = version > 0 ? reader.ReadInt() : 0;
+            Shape instance = shapeFactory.Get(shapeId, materialId);
             instance.Load(reader);
             shapes.Add(instance);
         }

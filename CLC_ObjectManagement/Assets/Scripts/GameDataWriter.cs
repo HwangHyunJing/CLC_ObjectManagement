@@ -41,4 +41,15 @@ public class GameDataWriter
         writer.Write(value.y);
         writer.Write(value.z);
     }
+
+    // 색상 정보를 다루기 위한
+    public void Write(Color value)
+    {
+        writer.Write(value.r);
+        writer.Write(value.g);
+        writer.Write(value.b);
+        writer.Write(value.a);
+    }
+
+    
 }

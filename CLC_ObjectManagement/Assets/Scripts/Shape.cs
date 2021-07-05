@@ -43,6 +43,7 @@ public class Shape : PersistableObject
     // Shape가 자신의 material 정보를 바꾸는 것을 막기 위해 set을 private으로 설정
     public int MaterialId { get; private set; }
 
+
     // 위에 setter의 기능을 대신하는 메소드
     public void SetMaterial(Material material, int materialId)
     {

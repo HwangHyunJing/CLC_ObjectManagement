@@ -36,6 +36,17 @@ public class Game : PersistableObject
     // 저장 버전
     const int saveVersion = 1;
 
+    // Creation의 속도
+    public float CreationSpeed { get; set; }
+    // creation의 진행 정도 (축적되는 값)
+    float creationProgress=0f;
+
+    // Destruction의 속도
+    public float DestructionSpeed { get; set; }
+    // destruction의 진행 정도 (축적되는 값)
+    float destructionProgress=0f;
+
+
     private void Awake()
     {
         shapes = new List<Shape>();
@@ -69,6 +80,21 @@ public class Game : PersistableObject
             // Load();
             BeginNewGame();
             storage.Load(this);
+        }
+
+        creationProgress += Time.deltaTime * CreationSpeed;
+        // progress가 1값에 도달할 때 마다 creation을 실행한다
+        while(creationProgress >= 1f)
+        {
+            creationProgress -= 1f;
+            CreateShape();
+        }
+
+        destructionProgress += Time.deltaTime * DestructionSpeed;
+        while(destructionProgress >= 1f)
+        {
+            destructionProgress -= 1f;
+            DestroyShape();
         }
     }
 

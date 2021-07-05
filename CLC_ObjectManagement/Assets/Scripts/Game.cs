@@ -13,6 +13,9 @@ public class Game : PersistableObject
     // 물체 생성에 해당하는 키 코드
     public KeyCode createKey = KeyCode.C;
 
+    // 물체를 제거하는 키 코드
+    public KeyCode destroyKey = KeyCode.X;
+
     // 게임을 새로 시작하는 키 코드
     public KeyCode newGameKey = KeyCode.N;
 
@@ -21,6 +24,7 @@ public class Game : PersistableObject
 
     // 저장한 정보를 로딩하는 키 코드
     public KeyCode loadKey = KeyCode.L;
+
 
     // 생성한 물체를 저장할 배열
     // List<Transform> objects;
@@ -47,6 +51,10 @@ public class Game : PersistableObject
             CreateShape();
         }
         // 한 번에 여러 키가 입력되는 것을 막기 위해 else-if 구문으로 묶음
+        else if(Input.GetKeyDown(destroyKey))
+        {
+            DestroyShape();
+        }
         else if(Input.GetKeyDown(newGameKey))
         {
             BeginNewGame();
@@ -150,4 +158,17 @@ public class Game : PersistableObject
         }
     }
 
+    void DestroyShape()
+    {
+        if(shapes.Count > 0)
+        {
+            int index = Random.Range(0, shapes.Count);
+            Destroy(shapes[index].gameObject);
+
+            int lastIndex = shapes.Count - 1;
+            shapes[index] = shapes[lastIndex];
+
+            shapes.RemoveAt(lastIndex);
+        }
+    }
 }

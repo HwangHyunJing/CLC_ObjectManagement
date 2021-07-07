@@ -128,8 +128,8 @@ public class Game : PersistableObject
         // Debug.Log("New Game Starts");
         for(int i=0; i < shapes.Count; i++)
         {
-            // 일단 물체를 제거
-            Destroy(shapes[i].gameObject);
+            shapeFactory.Reclaim(shapes[i]);
+
         }
 
         // 배열의 내용은 한번에 정리
@@ -189,7 +189,9 @@ public class Game : PersistableObject
         if(shapes.Count > 0)
         {
             int index = Random.Range(0, shapes.Count);
-            Destroy(shapes[index].gameObject);
+            // Destroy(shapes[index].gameObject);
+            // 바로 파괴하는 대신, 재활용을 판단 및 처리
+            shapeFactory.Reclaim(shapes[index]);
 
             int lastIndex = shapes.Count - 1;
             shapes[index] = shapes[lastIndex];

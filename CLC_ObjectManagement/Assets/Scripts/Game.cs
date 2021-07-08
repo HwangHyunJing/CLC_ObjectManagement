@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 // using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // 물체의 생성에만 관여. 저장/로드는 Persistable Object. cs가 담당
 public class Game : PersistableObject
@@ -46,11 +47,23 @@ public class Game : PersistableObject
     // destruction의 진행 정도 (축적되는 값)
     float destructionProgress=0f;
 
-
-    private void Awake()
+    private void Start()
     {
         shapes = new List<Shape>();
         // persistent Data Path는 'file'이 아니라 'folder' 경로이다
+
+        if(Application.isEditor)
+        {
+            // 만약 해당 Scene이 이미 열려있다면, 활성화시키고 리턴해서 중복 생성을 막는다
+            Scene loadedLevel = SceneManager.GetSceneByName("Level 1");
+            if (loadedLevel.isLoaded)
+            {
+                SceneManager.SetActiveScene(loadedLevel);
+                return;
+            }
+        }
+
+        StartCoroutine(LoadLevel());
     }
 
     private void Update()
@@ -199,5 +212,20 @@ public class Game : PersistableObject
 
             shapes.RemoveAt(lastIndex);
         }
+    }
+
+    IEnumerator LoadLevel()
+    {
+        // 로딩되지 않은 scene에 대한 명령을 비활성화시키기 위함
+        // 보통 여기서 로딩창을 띄운다
+        enabled = false;
+
+        // 로드 메소드를 실행하면서 코루틴도 돌리는 방법; 씬의 로딩이 끝날때까지를 측정
+        yield return SceneManager.LoadSceneAsync("Level 1", LoadSceneMode.Additive);
+
+        // 로드할 뿐 아니라, 해당 Scene이 active하도록 해야 한다
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName("Level 1"));
+        enabled = true;
+
     }
 }

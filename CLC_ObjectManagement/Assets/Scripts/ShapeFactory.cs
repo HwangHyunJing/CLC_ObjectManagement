@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // 스크립트를 Asset으로 만드는 명령....;
 [CreateAssetMenu]
@@ -20,6 +21,9 @@ public class ShapeFactory : ScriptableObject
 
     // 제거될 물체들을 재활용하기 위해 저장하는 공간
     List<Shape>[] pools;
+
+    // 재활용할 물체들을 저장할 별도의 씬
+    Scene poolScene;
 
     // shape id에 해당하는 도형을 가져온다
     public Shape Get(int shapeId = 0, int materialId = 0)
@@ -52,6 +56,11 @@ public class ShapeFactory : ScriptableObject
             {
                 instance = Instantiate(prefabs[shapeId]);
                 instance.ShapeId = shapeId;
+
+                // recycle을 하는 경우, 만든 object를 extra scene으로 옮긴다
+                SceneManager.MoveGameObjectToScene(
+                    instance.gameObject, poolScene
+                    );
             }
 
         }
@@ -81,6 +90,33 @@ public class ShapeFactory : ScriptableObject
         {
             pools[i] = new List<Shape>();
         }
+
+        // 이 작업은 에디터 상에서만 가능하다
+        if(Application.isEditor)
+        {
+            // 해당 씬이 존재하는지 탐색, 그 값을 받아와야 한다 (recompile 과정에서 값 상실)
+            poolScene = SceneManager.GetSceneByName(name);
+            // recompile시, 이미 pool이 있다면 다시 초기화하기 않는다
+            if (poolScene.isLoaded)
+            {
+                // recompile 과정에서 Scene과 prefab들의 연결이 끊어지는 것을 대비
+                GameObject[] rootObjects = poolScene.GetRootGameObjects();
+
+                for(int i=0; i < rootObjects.Length; i++)
+                {
+                    Shape pooledShape = rootObjects[i].GetComponent<Shape>();
+                    if(!pooledShape.gameObject.activeSelf)
+                    {
+                        pools[pooledShape.ShapeId].Add(pooledShape);
+                    }
+                }
+                return;
+            }
+        }
+
+        // recycle을 하는 경우, 이를 위한 Scene을 만들어야 한다
+        poolScene = SceneManager.CreateScene(name);
+        // cf. name은 Object의 name을 의미한다. 여기서는 ShapeFactory
     }
 
     public void Reclaim (Shape shapeToRecycle)
@@ -100,4 +136,5 @@ public class ShapeFactory : ScriptableObject
             Destroy(shapeToRecycle.gameObject);
         }
     }
+
 }

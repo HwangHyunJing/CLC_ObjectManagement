@@ -128,8 +128,9 @@ public class Game : PersistableObject
         // Debug.Log("New Game Starts");
         for(int i=0; i < shapes.Count; i++)
         {
+            // 다시 가져오는 건 shapeFactory가 주체로 호출할 수 없다
+            // Reclaim 기능이 생산이 아니라 기록 로드에 가까워서 그런건가?
             shapeFactory.Reclaim(shapes[i]);
-
         }
 
         // 배열의 내용은 한번에 정리

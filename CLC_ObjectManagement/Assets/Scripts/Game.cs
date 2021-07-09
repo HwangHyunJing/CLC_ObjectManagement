@@ -35,7 +35,7 @@ public class Game : PersistableObject
     public PersistableStorage storage;
 
     // 저장 버전
-    const int saveVersion = 1;
+    const int saveVersion = 2;
 
     // Creation의 속도
     public float CreationSpeed { get; set; }
@@ -47,6 +47,12 @@ public class Game : PersistableObject
     // destruction의 진행 정도 (축적되는 값)
     float destructionProgress=0f;
 
+    // 전체 레벨의 수
+    public int levelCount;
+
+    // 지금 load가 되어있는 씬의 index
+    int loadedLevelBuildIndex;
+
     private void Start()
     {
         shapes = new List<Shape>();
@@ -54,6 +60,7 @@ public class Game : PersistableObject
 
         if(Application.isEditor)
         {
+            /*
             // 만약 해당 Scene이 이미 열려있다면, 활성화시키고 리턴해서 중복 생성을 막는다
             Scene loadedLevel = SceneManager.GetSceneByName("Level 1");
             if (loadedLevel.isLoaded)
@@ -61,9 +68,24 @@ public class Game : PersistableObject
                 SceneManager.SetActiveScene(loadedLevel);
                 return;
             }
+            */
+
+            for(int i=0; i < SceneManager.sceneCount; i++)
+            {
+                Scene loadedScene = SceneManager.GetSceneAt(i);
+                if (loadedScene.name.Contains("Level "))
+                {
+                    // 확실하게 켜두기 위한 명령어
+                    SceneManager.SetActiveScene(loadedScene);
+                    // build setting상에서, 지금 로드된 씬의 index를 제공
+                    loadedLevelBuildIndex = loadedScene.buildIndex;
+                    // 이후 불필요한 추가적인 로드를 막음
+                    return;
+                }
+            }
         }
 
-        StartCoroutine(LoadLevel());
+        StartCoroutine(LoadLevel(1));
     }
 
     private void Update()
@@ -93,6 +115,21 @@ public class Game : PersistableObject
             // Load();
             BeginNewGame();
             storage.Load(this);
+        }
+        // 숫자키를 통해 레벨을 입력
+        else
+        {
+            // 유효하지 않은 레벨을 걸러냄
+            for(int i=1; i <= levelCount; i++)
+            {
+                if(Input.GetKeyDown(KeyCode.Alpha0 + i))
+                {
+                    // 새로운 레벨이 로드되면, 게임도 리셋
+                    BeginNewGame();
+                    StartCoroutine(LoadLevel(i));
+                    return;
+                }
+            }
         }
 
         creationProgress += Time.deltaTime * CreationSpeed;
@@ -214,18 +251,28 @@ public class Game : PersistableObject
         }
     }
 
-    IEnumerator LoadLevel()
+    IEnumerator LoadLevel(int levelBuildIndex)
     {
         // 로딩되지 않은 scene에 대한 명령을 비활성화시키기 위함
         // 보통 여기서 로딩창을 띄운다
         enabled = false;
 
+        // 0번 main을 제외한 다른 Scene을 로드하려고 한다면
+        if(loadedLevelBuildIndex > 0)
+        {
+            // 지금 로드되어있는 레벨의 인덱스를 제거
+            yield return SceneManager.UnloadSceneAsync(loadedLevelBuildIndex);
+        }
+
         // 로드 메소드를 실행하면서 코루틴도 돌리는 방법; 씬의 로딩이 끝날때까지를 측정
-        yield return SceneManager.LoadSceneAsync("Level 1", LoadSceneMode.Additive);
+        yield return SceneManager.LoadSceneAsync(levelBuildIndex, LoadSceneMode.Additive);
 
         // 로드할 뿐 아니라, 해당 Scene이 active하도록 해야 한다
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName("Level 1"));
-        enabled = true;
+        // SceneManager.SetActiveScene(SceneManager.GetSceneByName("Level 1"));
+        SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex(levelBuildIndex));
+        // 새로운 씬이 성공적으로 로드될 때 마다, 몇 번째 index인지 업데이트
+        loadedLevelBuildIndex = levelBuildIndex;
 
+        enabled = true;
     }
 }

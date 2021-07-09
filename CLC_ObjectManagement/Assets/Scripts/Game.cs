@@ -195,6 +195,8 @@ public class Game : PersistableObject
         // writer.Write(-saveVersion);
         // 배열의 길이를 기록
         writer.Write(shapes.Count);
+        // 마지막으로 로드되었던 레벨의 index까지 저장한다
+        writer.Write(loadedLevelBuildIndex);
 
         for(int i=0; i < shapes.Count; i++)
         {
@@ -223,7 +225,8 @@ public class Game : PersistableObject
 
         // 배열의 길이를 읽어옴
         int count = version <= 0 ? -version : reader.ReadInt();
-
+        // 버전이 2보다 낮아 레벨 로드 미지원인 경우, 디폴트로 레벨 1을 로드
+        StartCoroutine(LoadLevel(version < 2 ? 1 : reader.ReadInt()));
 
         for(int i=0; i < count; i++)
         {

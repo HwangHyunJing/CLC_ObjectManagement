@@ -28,7 +28,6 @@ public class Game : PersistableObject
 
 
     // 생성한 물체를 저장할 배열
-    // List<Transform> objects;
     List<Shape> shapes;
 
     // transform 정보를 저장할 위치
@@ -53,6 +52,9 @@ public class Game : PersistableObject
     // 지금 load가 되어있는 씬의 index
     int loadedLevelBuildIndex;
 
+    // 물체가 생성되는 랜덤한 지점 (구하는 건 해당 스크립트가 해줌)
+    public SpawnZone spawnZone;
+
     private void Start()
     {
         shapes = new List<Shape>();
@@ -60,15 +62,6 @@ public class Game : PersistableObject
 
         if(Application.isEditor)
         {
-            /*
-            // 만약 해당 Scene이 이미 열려있다면, 활성화시키고 리턴해서 중복 생성을 막는다
-            Scene loadedLevel = SceneManager.GetSceneByName("Level 1");
-            if (loadedLevel.isLoaded)
-            {
-                SceneManager.SetActiveScene(loadedLevel);
-                return;
-            }
-            */
 
             for(int i=0; i < SceneManager.sceneCount; i++)
             {
@@ -157,8 +150,8 @@ public class Game : PersistableObject
         Shape instance = shapeFactory.GetRandom();
         Transform t = instance.transform;
 
-        // 반지름이 1인 구 범위 내. 5를 곱해 범위를 넓힘
-        t.localPosition = Random.insideUnitSphere * 5f;
+        // 반지름이 1인 구 범위 내.
+        t.localPosition = spawnZone.SpawnPoint;
         // 랜덤한 쿼터니언 성분을 리턴
         t.localRotation = Random.rotation;
         // Random. Range는 float를 리턴하기 때문에, transform.scale로 쓰려면 Vector를 곱해야 한다

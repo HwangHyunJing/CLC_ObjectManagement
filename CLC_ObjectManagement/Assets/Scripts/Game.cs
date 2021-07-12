@@ -9,7 +9,8 @@ public class Game : PersistableObject
 {
     // 소환할 물체의 정보
     // 이제 PersistableObject형 prefab류 대신, ShapeFactory형 shapes를 사용
-    public ShapeFactory shapeFactory;
+    [SerializeField]
+    ShapeFactory shapeFactory;
 
     // 물체 생성에 해당하는 키 코드
     public KeyCode createKey = KeyCode.C;
@@ -31,9 +32,11 @@ public class Game : PersistableObject
     List<Shape> shapes;
 
     // transform 정보를 저장할 위치
-    public PersistableStorage storage;
+    [SerializeField]
+    PersistableStorage storage;
 
     // 저장 버전
+    [SerializeField]
     const int saveVersion = 2;
 
     // Creation의 속도
@@ -53,10 +56,21 @@ public class Game : PersistableObject
     int loadedLevelBuildIndex;
 
     // 물체가 생성되는 랜덤한 지점 (구하는 건 해당 스크립트가 해줌)
-    public SpawnZone spawnZone;
+    public SpawnZone SpawnZoneOfLevel1 { get; set; }
+
+    public static Game Instance { get; private set; }
+
+    private void OnEnable()
+    {
+        // Unity의 editor는 Instance를 자동으로 켜주지 않기 때문
+        Instance = this;
+    }
 
     private void Start()
     {
+        // 싱글톤같은데?
+        Instance = this;
+
         shapes = new List<Shape>();
         // persistent Data Path는 'file'이 아니라 'folder' 경로이다
 
@@ -151,7 +165,7 @@ public class Game : PersistableObject
         Transform t = instance.transform;
 
         // 반지름이 1인 구 범위 내.
-        t.localPosition = spawnZone.SpawnPoint;
+        t.localPosition = SpawnZoneOfLevel1.SpawnPoint;
         // 랜덤한 쿼터니언 성분을 리턴
         t.localRotation = Random.rotation;
         // Random. Range는 float를 리턴하기 때문에, transform.scale로 쓰려면 Vector를 곱해야 한다

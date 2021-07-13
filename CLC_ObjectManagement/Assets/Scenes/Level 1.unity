@@ -131,7 +131,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 949011999}
-  - component: {fileID: 949011998}
   - component: {fileID: 949012000}
   m_Layer: 0
   m_Name: Spawn Zone
@@ -140,18 +139,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &949011998
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 949011997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2cc34351804d8f4582c31bd9e3c3f60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &949011999
 Transform:
   m_ObjectHideFlags: 0
@@ -160,8 +147,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 949011997}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.3253821, y: 1.2037375, z: -10.193359}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -4.3, y: 1.2037375, z: -10.193359}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -178,7 +165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2388f2335ac22f40b56c40e97ebc282, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  surfaceOnly: 0
+  surfaceOnly: 1
 --- !u!1 &1058681002
 GameObject:
   m_ObjectHideFlags: 0

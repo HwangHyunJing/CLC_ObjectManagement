@@ -51,5 +51,10 @@ public class GameDataWriter
         writer.Write(value.a);
     }
 
-    
+    // 직렬화된 랜덤 데이터를 받아 기록하는 메소드
+    public void Write(Random.State value)
+    {
+        // 데이터를 직접 넘겨줄 수 없으므로 직렬화 타입을 활용
+        writer.Write(JsonUtility.ToJson(value));
+    }
 }

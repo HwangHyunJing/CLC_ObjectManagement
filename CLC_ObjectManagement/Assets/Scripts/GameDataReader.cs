@@ -61,4 +61,10 @@ public class GameDataReader
 
         return value;
     }
+
+    public Random.State ReadRandomState()
+    {
+        // <Random.State> 형의 정보 reader.ReadString()을, Json이 처리
+        return JsonUtility.FromJson<Random.State>(reader.ReadString());
+    }
 }

@@ -37,7 +37,7 @@ public class Game : PersistableObject
 
     // 저장 버전
     [SerializeField]
-    const int saveVersion = 2;
+    const int saveVersion = 3;
 
     // Creation의 속도
     public float CreationSpeed { get; set; }
@@ -55,6 +55,13 @@ public class Game : PersistableObject
     // 지금 load가 되어있는 씬의 index
     int loadedLevelBuildIndex;
 
+    // 완전한 랜덤이 아니라, 메인 state를 기반으로 한 random(이 무슨)
+    Random.State mainRandomState;
+
+    // Load를 할 때 seed를 다시 설정할지 여부
+    [SerializeField]
+    bool reseedOnLoad;
+
     // 물체가 생성되는 랜덤한 지점 (구하는 건 해당 스크립트가 해줌)
     public SpawnZone SpawnZoneOfLevel1 { get; set; }
 
@@ -68,6 +75,9 @@ public class Game : PersistableObject
 
     private void Start()
     {
+        // 코드 시작시 일단 랜덤 상태를 부여받음
+        mainRandomState = Random.state;
+
         // 싱글톤같은데?
         Instance = this;
 
@@ -92,6 +102,7 @@ public class Game : PersistableObject
             }
         }
 
+        BeginNewGame();
         StartCoroutine(LoadLevel(1));
     }
 
@@ -182,6 +193,16 @@ public class Game : PersistableObject
     // 다시 게임을 시작(Clear 용도)
     void BeginNewGame()
     {
+        // 새 게임을 시작하면 메인 rdm 상태를 주고
+        Random.state = mainRandomState;
+        // 시간에 따른 시드값을 새로 생성
+        int seed = Random.Range(0, int.MaxValue) ^ (int)Time.unscaledTime;
+
+        mainRandomState = Random.state;
+
+        // 메인 state와 새로운 seed를 이용해 새로운 state를 만든다
+        Random.InitState(seed);
+
         // Debug.Log("New Game Starts");
         for(int i=0; i < shapes.Count; i++)
         {
@@ -202,6 +223,8 @@ public class Game : PersistableObject
         // writer.Write(-saveVersion);
         // 배열의 길이를 기록
         writer.Write(shapes.Count);
+        // 
+        writer.Write(Random.state);
         // 마지막으로 로드되었던 레벨의 index까지 저장한다
         writer.Write(loadedLevelBuildIndex);
 
@@ -209,6 +232,9 @@ public class Game : PersistableObject
         {
             // 해당 도형의 shape id 정보를 기록
             writer.Write(shapes[i].ShapeId);
+
+            
+
             writer.Write(shapes[i].MaterialId);
             // writer 인자 정보에 각 shape들의 transform 정보를 넘김
             shapes[i].Save(writer);
@@ -222,9 +248,11 @@ public class Game : PersistableObject
         // 저장된 정보의 세이브 방식을 읽어옴
         int version = reader.Version;
 
+        
+
         // version이 count의 정보를 받았다면, 해당 값은 음수가 된다
         // saveVersion의 초기화값은 1이 되므로, 그 경우 에러를 호출해야 한다
-        if(version > saveVersion)
+        if (version > saveVersion)
         {
             Debug.LogError("Unsupported future save version " + version);
             return;
@@ -232,6 +260,21 @@ public class Game : PersistableObject
 
         // 배열의 길이를 읽어옴
         int count = version <= 0 ? -version : reader.ReadInt();
+
+        // seed 및 state관련 저장 여부를 검사
+        if (version >= 3)
+        {
+            // 기존에 저장된 seed값을 읽어들임
+            Random.State state = reader.ReadRandomState();
+
+            // load에서 시드 재설정을 원하지 않는다면
+            if (!reseedOnLoad)
+            {
+                // 로드된 seed 상태를 사용
+                Random.state = state;
+            }
+        }
+
         // 버전이 2보다 낮아 레벨 로드 미지원인 경우, 디폴트로 레벨 1을 로드
         StartCoroutine(LoadLevel(version < 2 ? 1 : reader.ReadInt()));
 
@@ -263,19 +306,24 @@ public class Game : PersistableObject
 
     IEnumerator LoadLevel(int levelBuildIndex)
     {
+        // Debug.Log("previous: " + loadedLevelBuildIndex + ", now: " + levelBuildIndex);
+
         // 로딩되지 않은 scene에 대한 명령을 비활성화시키기 위함
         // 보통 여기서 로딩창을 띄운다
         enabled = false;
 
-        // 0번 main을 제외한 다른 Scene을 로드하려고 한다면
+        // 자신의 현재 scene을 종료 (0 제외)
         if(loadedLevelBuildIndex > 0)
         {
+            Debug.Log("previous: " + loadedLevelBuildIndex + ", now: " + levelBuildIndex);
+
             // 지금 로드되어있는 레벨의 인덱스를 제거
             yield return SceneManager.UnloadSceneAsync(loadedLevelBuildIndex);
         }
 
         // 로드 메소드를 실행하면서 코루틴도 돌리는 방법; 씬의 로딩이 끝날때까지를 측정
-        yield return SceneManager.LoadSceneAsync(levelBuildIndex, LoadSceneMode.Additive);
+        yield return SceneManager.LoadSceneAsync(
+            levelBuildIndex, LoadSceneMode.Additive);
 
         // 로드할 뿐 아니라, 해당 Scene이 active하도록 해야 한다
         // SceneManager.SetActiveScene(SceneManager.GetSceneByName("Level 1"));
@@ -285,4 +333,6 @@ public class Game : PersistableObject
 
         enabled = true;
     }
+
+
 }

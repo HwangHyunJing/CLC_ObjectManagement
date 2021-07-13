@@ -9,7 +9,7 @@ public class GameLevel : MonoBehaviour
 
     private void Start()
     {
-        // 만들어둔 get을 통해 Game 인스턴스의 성분으 가져옴 (singleton)
+        // 만들어둔 get을 통해 Game 인스턴스의 성분을 가져옴 (singleton)
         Game.Instance.SpawnZoneOfLevel1 = spawnZone;
     }
 

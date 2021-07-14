@@ -65,12 +65,12 @@ public class Game : PersistableObject
     // 물체가 생성되는 랜덤한 지점 (구하는 건 해당 스크립트가 해줌)
     public SpawnZone SpawnZoneOfLevel1 { get; set; }
 
-    public static Game Instance { get; private set; }
+    // public static Game Instance { get; private set; }
 
     private void OnEnable()
     {
         // Unity의 editor는 Instance를 자동으로 켜주지 않기 때문
-        Instance = this;
+        // Instance = this;
     }
 
     private void Start()
@@ -79,7 +79,7 @@ public class Game : PersistableObject
         mainRandomState = Random.state;
 
         // 싱글톤같은데?
-        Instance = this;
+        // Instance = this;
 
         shapes = new List<Shape>();
         // persistent Data Path는 'file'이 아니라 'folder' 경로이다
@@ -170,13 +170,11 @@ public class Game : PersistableObject
     // 의미를 확실하게 하기 위해 o 대신 instance로 단어를 변화
     void CreateShape()
     {
-        // Transform t = Instantiate(prefab);
-        // PersistableObject o = Instantiate(prefab);
         Shape instance = shapeFactory.GetRandom();
         Transform t = instance.transform;
 
-        // 반지름이 1인 구 범위 내.
-        t.localPosition = SpawnZoneOfLevel1.SpawnPoint;
+        // 반지름이 1인 구 범위 내. (getter로 값 받아옴)
+        t.localPosition = GameLevel.Current.SpawnPoint;
         // 랜덤한 쿼터니언 성분을 리턴
         t.localRotation = Random.rotation;
         // Random. Range는 float를 리턴하기 때문에, transform.scale로 쓰려면 Vector를 곱해야 한다
@@ -189,7 +187,6 @@ public class Game : PersistableObject
         shapes.Add(instance);
     }
 
-    // objects -> shapes
     // 다시 게임을 시작(Clear 용도)
     void BeginNewGame()
     {
@@ -215,6 +212,23 @@ public class Game : PersistableObject
         shapes.Clear();
     }
 
+    void DestroyShape()
+    {
+        if (shapes.Count > 0)
+        {
+            int index = Random.Range(0, shapes.Count);
+            // Destroy(shapes[index].gameObject);
+            // 바로 파괴하는 대신, 재활용을 판단 및 처리
+            shapeFactory.Reclaim(shapes[index]);
+
+            int lastIndex = shapes.Count - 1;
+            shapes[index] = shapes[lastIndex];
+
+            shapes.RemoveAt(lastIndex);
+        }
+    }
+
+
     // objects -> shapes
 
     public override void Save(GameDataWriter writer)
@@ -223,10 +237,12 @@ public class Game : PersistableObject
         // writer.Write(-saveVersion);
         // 배열의 길이를 기록
         writer.Write(shapes.Count);
-        // 
+        // 랜덤에 대한 정보를 기록
         writer.Write(Random.state);
         // 마지막으로 로드되었던 레벨의 index까지 저장한다
         writer.Write(loadedLevelBuildIndex);
+        // 레벨 자체에 대한 정보를 기록
+        GameLevel.Current.Save(writer);
 
         for(int i=0; i < shapes.Count; i++)
         {
@@ -248,8 +264,6 @@ public class Game : PersistableObject
         // 저장된 정보의 세이브 방식을 읽어옴
         int version = reader.Version;
 
-        
-
         // version이 count의 정보를 받았다면, 해당 값은 음수가 된다
         // saveVersion의 초기화값은 1이 되므로, 그 경우 에러를 호출해야 한다
         if (version > saveVersion)
@@ -257,6 +271,17 @@ public class Game : PersistableObject
             Debug.LogError("Unsupported future save version " + version);
             return;
         }
+        StartCoroutine(LoadGame(reader));
+
+    }
+
+
+
+    // 게임을 로드할 때 기능이 너무 많아서 분리
+    IEnumerator LoadGame (GameDataReader reader)
+    {
+        // 버전 확인 우선
+        int version = reader.Version;
 
         // 배열의 길이를 읽어옴
         int count = version <= 0 ? -version : reader.ReadInt();
@@ -276,9 +301,15 @@ public class Game : PersistableObject
         }
 
         // 버전이 2보다 낮아 레벨 로드 미지원인 경우, 디폴트로 레벨 1을 로드
-        StartCoroutine(LoadLevel(version < 2 ? 1 : reader.ReadInt()));
+        yield return LoadLevel(version < 2 ? 1 : reader.ReadInt());
 
-        for(int i=0; i < count; i++)
+        // 레벨 자체의 데이터까지 지원하는 버전의 경우, 해당 정보를 로드
+        if(version >= 3)
+        {
+            GameLevel.Current.Load(reader);
+        }
+
+        for (int i = 0; i < count; i++)
         {
             int shapeId = version > 0 ? reader.ReadInt() : 0;
             int materialId = version > 0 ? reader.ReadInt() : 0;
@@ -288,32 +319,14 @@ public class Game : PersistableObject
         }
     }
 
-    void DestroyShape()
-    {
-        if(shapes.Count > 0)
-        {
-            int index = Random.Range(0, shapes.Count);
-            // Destroy(shapes[index].gameObject);
-            // 바로 파괴하는 대신, 재활용을 판단 및 처리
-            shapeFactory.Reclaim(shapes[index]);
-
-            int lastIndex = shapes.Count - 1;
-            shapes[index] = shapes[lastIndex];
-
-            shapes.RemoveAt(lastIndex);
-        }
-    }
-
     IEnumerator LoadLevel(int levelBuildIndex)
     {
-        // Debug.Log("previous: " + loadedLevelBuildIndex + ", now: " + levelBuildIndex);
-
         // 로딩되지 않은 scene에 대한 명령을 비활성화시키기 위함
         // 보통 여기서 로딩창을 띄운다
         enabled = false;
 
         // 자신의 현재 scene을 종료 (0 제외)
-        if(loadedLevelBuildIndex > 0)
+        if (loadedLevelBuildIndex > 0)
         {
             Debug.Log("previous: " + loadedLevelBuildIndex + ", now: " + levelBuildIndex);
 
@@ -326,13 +339,10 @@ public class Game : PersistableObject
             levelBuildIndex, LoadSceneMode.Additive);
 
         // 로드할 뿐 아니라, 해당 Scene이 active하도록 해야 한다
-        // SceneManager.SetActiveScene(SceneManager.GetSceneByName("Level 1"));
         SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex(levelBuildIndex));
         // 새로운 씬이 성공적으로 로드될 때 마다, 몇 번째 index인지 업데이트
         loadedLevelBuildIndex = levelBuildIndex;
 
         enabled = true;
     }
-
-
 }

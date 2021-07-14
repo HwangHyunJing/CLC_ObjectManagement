@@ -1220,7 +1220,8 @@ MonoBehaviour:
   saveKey: 115
   loadKey: 108
   storage: {fileID: 1004552187}
-  levelCount: 2
+  levelCount: 3
+  reseedOnLoad: 0
 --- !u!4 &1890919058
 Transform:
   m_ObjectHideFlags: 0

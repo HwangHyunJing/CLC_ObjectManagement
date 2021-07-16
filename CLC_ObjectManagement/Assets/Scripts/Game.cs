@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-// using System.IO;
+using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -61,6 +61,12 @@ public class Game : PersistableObject
     // Load를 할 때 seed를 다시 설정할지 여부
     [SerializeField]
     bool reseedOnLoad;
+
+    // 변화된 값을 slider에 적용시켜주기 위한 참조. 그냥 inspector상에서 넘겨줌
+    [SerializeField]
+    Slider creationSpeedSlider;
+    [SerializeField]
+    Slider destructionSpeedSlider;
 
     // 물체가 생성되는 랜덤한 지점 (구하는 건 해당 스크립트가 해줌)
     public SpawnZone SpawnZoneOfLevel1 { get; set; }
@@ -151,16 +157,23 @@ public class Game : PersistableObject
             }
         }
 
+        
+    }
+
+    private void FixedUpdate()
+    {
+        // 생성 및 파괴의 경우 프레임에 영향을 받지 않도록 하기 위해 Fixed가 담당
+
         creationProgress += Time.deltaTime * CreationSpeed;
         // progress가 1값에 도달할 때 마다 creation을 실행한다
-        while(creationProgress >= 1f)
+        while (creationProgress >= 1f)
         {
             creationProgress -= 1f;
             CreateShape();
         }
 
         destructionProgress += Time.deltaTime * DestructionSpeed;
-        while(destructionProgress >= 1f)
+        while (destructionProgress >= 1f)
         {
             destructionProgress -= 1f;
             DestroyShape();
@@ -201,6 +214,10 @@ public class Game : PersistableObject
         // 메인 state와 새로운 seed를 이용해 새로운 state를 만든다
         Random.InitState(seed);
 
+        // 슬라이더와 값의 데이터 초기화 (슬라이더는 serialize 방식으로 참조)
+        creationSpeedSlider.value = CreationSpeed = 0f;
+        destructionSpeedSlider.value = DestructionSpeed = 0f;
+
         // Debug.Log("New Game Starts");
         for(int i=0; i < shapes.Count; i++)
         {
@@ -234,12 +251,17 @@ public class Game : PersistableObject
 
     public override void Save(GameDataWriter writer)
     {
-        // 저장 정보의 버전을 기록
-        // writer.Write(-saveVersion);
+        // 저장 정보의 버전은 다른 곳에서 먼저 기록합니다
+
         // 배열의 길이를 기록
         writer.Write(shapes.Count);
         // 랜덤에 대한 정보를 기록
         writer.Write(Random.state);
+        // 생성 및 파괴 값을 저장
+        writer.Write(CreationSpeed);
+        writer.Write(creationProgress);
+        writer.Write(DestructionSpeed);
+        writer.Write(destructionProgress);
         // 마지막으로 로드되었던 레벨의 index까지 저장한다
         writer.Write(loadedLevelBuildIndex);
         // 레벨 자체에 대한 정보를 기록
@@ -299,6 +321,11 @@ public class Game : PersistableObject
                 // 로드된 seed 상태를 사용
                 Random.state = state;
             }
+
+            creationSpeedSlider.value = CreationSpeed = reader.ReadFloat();
+            creationProgress = reader.ReadFloat();
+            destructionSpeedSlider.value = DestructionSpeed = reader.ReadFloat();
+            destructionProgress = reader.ReadFloat();
         }
 
         // 버전이 2보다 낮아 레벨 로드 미지원인 경우, 디폴트로 레벨 1을 로드

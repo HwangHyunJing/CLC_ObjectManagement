@@ -151,6 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcc16430000bde242bf2d834c2252b91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawnMovementDirection: 1
   spawnZones:
   - {fileID: 1066434861}
   - {fileID: 1869996071}
@@ -264,6 +265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2388f2335ac22f40b56c40e97ebc282, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawnMovementDirection: 0
   surfaceOnly: 0
 --- !u!1 &1337587387
 GameObject:
@@ -289,13 +291,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1337587387}
-  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: -2, z: 0}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children: []
   m_Father: {fileID: 129633189}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!114 &1337587389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -308,6 +310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e90211867028e9478c6caeb284975b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawnMovementDirection: 0
   surfaceOnly: 1
 --- !u!1 &1558226959
 GameObject:
@@ -444,6 +447,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2388f2335ac22f40b56c40e97ebc282, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawnMovementDirection: 0
   surfaceOnly: 1
 --- !u!1 &2005965386
 GameObject:
@@ -469,13 +473,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2005965386}
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children: []
   m_Father: {fileID: 129633189}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!114 &2005965388
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -488,4 +492,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e90211867028e9478c6caeb284975b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawnMovementDirection: 0
   surfaceOnly: 0

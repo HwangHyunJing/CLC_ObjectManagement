@@ -9,6 +9,37 @@ public abstract class SpawnZone : PersistableObject
 
     public abstract Vector3 SpawnPoint { get; }
 
+    // spawn zone을 기준으로 shape들이 움직이는 방향에 대한 열거형
+    public enum SpawnMovementDirection
+    {
+        Forward,
+        Upward,
+        Outward,
+        Random
+    }
+    [SerializeField]
+    SpawnMovementDirection spawnMovementDirection;
+
+    // shape가 움직이는 속력에 대한 최소/최대값
+    [SerializeField]
+    FloatRange spawnSpeed;
+
+    [System.Serializable]
+    // 속력 범위 설정을 깔끔하게 하기 위한 구조체
+    public struct FloatRange
+    {
+        public float min, max;
+
+        // 실제로 사용될 속력값
+        public float RandomValueInRange
+        {
+            get
+            {
+                return Random.Range(min, max);
+            }
+        }
+    }
+
     // Game.cs의 CreateShape 코드를 복사, 수정
     // 값의 configure를 Game.cs가 아니라 여기서 담당
     public virtual void ConfigureSpawn(Shape shape)
@@ -27,7 +58,28 @@ public abstract class SpawnZone : PersistableObject
             0f, 1f, .5f, 1f, .25f, 1f, 1f, 1f));
         // 랜덤한 회전 속도를 부여
         shape.AngularVelocity = Random.onUnitSphere * Random.Range(0f, 90f);
-        // 랜덤한 이동 속도를 부여
-        shape.Velocity = transform.forward * Random.Range(0f, 2f);
+
+        //
+        Vector3 direction;
+        if(spawnMovementDirection == SpawnMovementDirection.Upward)
+        {
+            // spawnzone에 종속되어 움직이므로, Vector3 형이 아니라 transform 성분이 맞다
+            direction = transform.up;
+        }
+        else if (spawnMovementDirection == SpawnMovementDirection.Outward)
+        {
+            // 정확히 zone의 중심에 spawn되는 게 아니므로 가능한 방식
+            direction = (t.localPosition - transform.position).normalized;
+        }
+        else if(spawnMovementDirection == SpawnMovementDirection.Random)
+        {
+            direction = Random.onUnitSphere;
+        }
+        else
+        {
+            direction = transform.forward;
+        }
+        // 랜덤 방향 대신에 주어진 성분을 사용
+        shape.Velocity = direction * spawnSpeed.RandomValueInRange;
     }
 }

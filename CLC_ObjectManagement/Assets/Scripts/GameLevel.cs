@@ -33,13 +33,11 @@ public class GameLevel : PersistableObject
         // Game.Instance.SpawnZoneOfLevel1 = spawnZone;
     }
 
-    public Vector3 SpawnPoint
+
+    // Game.cs가 현재의 레벨을 참조해서 호출
+    public void ConfigureSpawn(Shape shape)
     {
-        // 기존에 setter 방식 대신에 getter로 넘기게 된다
-        get
-        {
-            return spawnZone.SpawnPoint;
-        }
+        spawnZone.ConfigureSpawn(shape);
     }
 
     public override void Save (GameDataWriter writer)

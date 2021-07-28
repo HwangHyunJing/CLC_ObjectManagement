@@ -37,7 +37,7 @@ public class Game : PersistableObject
 
     // 저장 버전
     [SerializeField]
-    const int saveVersion = 3;
+    const int saveVersion = 4;
 
     // Creation의 속도
     public float CreationSpeed { get; set; }
@@ -83,9 +83,6 @@ public class Game : PersistableObject
     {
         // 코드 시작시 일단 랜덤 상태를 부여받음
         mainRandomState = Random.state;
-
-        // 싱글톤같은데?
-        // Instance = this;
 
         shapes = new List<Shape>();
         // persistent Data Path는 'file'이 아니라 'folder' 경로이다
@@ -164,6 +161,11 @@ public class Game : PersistableObject
     {
         // 생성 및 파괴의 경우 프레임에 영향을 받지 않도록 하기 위해 Fixed가 담당
 
+        for(int i=0; i < shapes.Count; i++)
+        {
+            shapes[i].GameUpdate();
+        }
+
         creationProgress += Time.deltaTime * CreationSpeed;
         // progress가 1값에 도달할 때 마다 creation을 실행한다
         while (creationProgress >= 1f)
@@ -185,18 +187,10 @@ public class Game : PersistableObject
     void CreateShape()
     {
         Shape instance = shapeFactory.GetRandom();
-        Transform t = instance.transform;
 
-        // 반지름이 1인 구 범위 내. (getter로 값 받아옴)
-        t.localPosition = GameLevel.Current.SpawnPoint;
-        // 랜덤한 쿼터니언 성분을 리턴
-        t.localRotation = Random.rotation;
-        // Random. Range는 float를 리턴하기 때문에, transform.scale로 쓰려면 Vector를 곱해야 한다
-        t.localScale = Vector3.one * Random.Range(0.1f, 1f);
+        // 도형의 configure는 SpanwZone.cs로 이관
+        GameLevel.Current.ConfigureSpawn(instance);
 
-        // 생성시 임의의 색상을 부여
-        instance.SetColor(Random.ColorHSV(
-            0f, 1f, .5f, 1f, .25f, 1f, 1f, 1f));
         // 배열에 추가
         shapes.Add(instance);
     }
@@ -271,8 +265,6 @@ public class Game : PersistableObject
         {
             // 해당 도형의 shape id 정보를 기록
             writer.Write(shapes[i].ShapeId);
-
-            
 
             writer.Write(shapes[i].MaterialId);
             // writer 인자 정보에 각 shape들의 transform 정보를 넘김

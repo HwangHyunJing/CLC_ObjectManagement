@@ -22,6 +22,18 @@ public class Shape : PersistableObject
         meshRenderer = GetComponent<MeshRenderer>();
     }
 
+    public Vector3 AngularVelocity { get; set; }
+    public Vector3 Velocity { get; set; }
+    
+    // private void FixedUpdate()
+    public void GameUpdate()
+    {
+        // 각 물체가 제자리에서 돌도록 함
+        transform.Rotate(AngularVelocity * Time.deltaTime);
+
+        transform.localPosition += Velocity * Time.deltaTime;
+    }
+
     // 외부에서 해당 성분에 접근하기 위한 조치
     public int ShapeId
     {
@@ -70,15 +82,21 @@ public class Shape : PersistableObject
         
     }
 
+    // 도형의 정보에 대해 저장할 것들이 생기면, 여기서 하면 된다
+
     public override void Save(GameDataWriter writer)
     {
         base.Save(writer);
         writer.Write(color);
+        writer.Write(AngularVelocity);
+        writer.Write(Velocity);
     }
 
     public override void Load (GameDataReader reader)
     {
         base.Load(reader);
         SetColor(reader.Version > 0 ? reader.ReadColor() : Color.white);
+        AngularVelocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
+        Velocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
     }
 }

@@ -9,6 +9,7 @@ public abstract class SpawnZone : PersistableObject
 
     public abstract Vector3 SpawnPoint { get; }
 
+    /*
     // spawn zone을 기준으로 shape들이 움직이는 방향에 대한 열거형
     public enum SpawnMovementDirection
     {
@@ -23,6 +24,26 @@ public abstract class SpawnZone : PersistableObject
     // shape가 움직이는 속력에 대한 최소/최대값
     [SerializeField]
     FloatRange spawnSpeed;
+    */
+
+    // shape의 이동에 대한 데이터를 하나로 묶음
+    [System.Serializable]
+    public struct SpawnConfiguration
+    {
+        public enum MovementDirection
+        {
+            Forward,
+            Upward,
+            Outward,
+            Random
+        }
+
+        public MovementDirection movementDirection;
+        public FloatRange speed;
+    }
+
+    [SerializeField]
+    SpawnConfiguration spawnConfig;
 
     [System.Serializable]
     // 속력 범위 설정을 깔끔하게 하기 위한 구조체
@@ -61,25 +82,24 @@ public abstract class SpawnZone : PersistableObject
 
         //
         Vector3 direction;
-        if(spawnMovementDirection == SpawnMovementDirection.Upward)
+
+        switch(spawnConfig.movementDirection)
         {
-            // spawnzone에 종속되어 움직이므로, Vector3 형이 아니라 transform 성분이 맞다
-            direction = transform.up;
+            case SpawnConfiguration.MovementDirection.Upward:
+                direction = transform.up;
+                break;
+            case SpawnConfiguration.MovementDirection.Outward:
+                direction = (t.localPosition - transform.position).normalized;
+                break;
+            case SpawnConfiguration.MovementDirection.Random:
+                direction = Random.onUnitSphere;
+                break;
+            default:
+                direction = transform.forward;
+                break;
         }
-        else if (spawnMovementDirection == SpawnMovementDirection.Outward)
-        {
-            // 정확히 zone의 중심에 spawn되는 게 아니므로 가능한 방식
-            direction = (t.localPosition - transform.position).normalized;
-        }
-        else if(spawnMovementDirection == SpawnMovementDirection.Random)
-        {
-            direction = Random.onUnitSphere;
-        }
-        else
-        {
-            direction = transform.forward;
-        }
+
         // 랜덤 방향 대신에 주어진 성분을 사용
-        shape.Velocity = direction * spawnSpeed.RandomValueInRange;
+        shape.Velocity = direction * spawnConfig.speed.RandomValueInRange;
     }
 }

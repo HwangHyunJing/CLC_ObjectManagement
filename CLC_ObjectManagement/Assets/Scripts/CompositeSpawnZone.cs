@@ -14,6 +14,10 @@ public class CompositeSpawnZone : SpawnZone
 
     int nextSequentialIndex;
 
+    // Spawn Zone에서 상속받은 속성
+    [SerializeField]
+    bool overrideConfig;
+
     public override Vector3 SpawnPoint
     {
         get
@@ -44,20 +48,28 @@ public class CompositeSpawnZone : SpawnZone
 
     public override void ConfigureSpawn(Shape shape)
     {
-        int index;
-        if(sequential)
+        if(overrideConfig)
         {
-            index = nextSequentialIndex++;
-            if(nextSequentialIndex >= spawnZones.Length)
-            {
-                nextSequentialIndex = 0;
-            }
+            // 하나의 configuration을 일괄적으로 받는 경우 (개별 설정의 번거로움 감소)
+            base.ConfigureSpawn(shape);
         }
         else
         {
-            index = Random.Range(0, spawnZones.Length);
-        }
-        spawnZones[index].ConfigureSpawn(shape);
+            int index;
+            if (sequential)
+            {
+                index = nextSequentialIndex++;
+                if (nextSequentialIndex >= spawnZones.Length)
+                {
+                    nextSequentialIndex = 0;
+                }
+            }
+            else
+            {
+                index = Random.Range(0, spawnZones.Length);
+            }
+            spawnZones[index].ConfigureSpawn(shape);
+        }   
     }
 
     public override void Save(GameDataWriter writer)

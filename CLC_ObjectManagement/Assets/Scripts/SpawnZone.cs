@@ -39,7 +39,14 @@ public abstract class SpawnZone : PersistableObject
         }
 
         public MovementDirection movementDirection;
+        // shape의 이동 속력
         public FloatRange speed;
+        // shape의 회전 속력
+        public FloatRange angularSpeed;
+        // shape의 크기
+        public FloatRange scale;
+
+        public ColorRangeHSV color;
     }
 
     [SerializeField]
@@ -61,6 +68,25 @@ public abstract class SpawnZone : PersistableObject
         }
     }
 
+
+    [System.Serializable]
+    public struct ColorRangeHSV
+    {
+        [FloatRangeSlider(0f, 1f)]
+        public FloatRange hue, saturation, value;
+
+        public Color RandomInRange
+        {
+            get
+            {
+                return Random.ColorHSV(
+                    hue.min, hue.max, saturation.min, saturation.max,
+                    value.min, value.max, 1f, 1f);
+            }
+        }
+    }
+
+
     // Game.cs의 CreateShape 코드를 복사, 수정
     // 값의 configure를 Game.cs가 아니라 여기서 담당
     public virtual void ConfigureSpawn(Shape shape)
@@ -71,14 +97,14 @@ public abstract class SpawnZone : PersistableObject
         t.localPosition = SpawnPoint;
         // 랜덤한 쿼터니언 성분을 리턴
         t.localRotation = Random.rotation;
-        // Random. Range는 float를 리턴하기 때문에, transform.scale로 쓰려면 Vector를 곱해야 한다
-        t.localScale = Vector3.one * Random.Range(0.1f, 1f);
+        // Random. Range는 float를 리턴, transform.scale로 쓰려면 Vector를 곱해야 한다
+        t.localScale = Vector3.one * spawnConfig.scale.RandomValueInRange;
 
         // 생성시 임의의 색상을 부여
-        shape.SetColor(Random.ColorHSV(
-            0f, 1f, .5f, 1f, .25f, 1f, 1f, 1f));
+        shape.SetColor(spawnConfig.color.RandomInRange);
         // 랜덤한 회전 속도를 부여
-        shape.AngularVelocity = Random.onUnitSphere * Random.Range(0f, 90f);
+        shape.AngularVelocity = 
+            Random.onUnitSphere * spawnConfig.angularSpeed.RandomValueInRange;
 
         //
         Vector3 direction;

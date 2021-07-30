@@ -165,10 +165,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2388f2335ac22f40b56c40e97ebc282, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnMovementDirection: 2
-  spawnSpeed:
-    min: 3
-    max: 10
+  spawnConfig:
+    movementDirection: 0
+    speed:
+      min: 0
+      max: 0
+    angularSpeed:
+      min: 0
+      max: 0
+    scale:
+      min: 0
+      max: 0
+    color:
+      hue:
+        min: 0.24971065
+        max: 0.5981245
+      saturation:
+        min: 0
+        max: 0
+      value:
+        min: 0
+        max: 0
   surfaceOnly: 1
 --- !u!1 &1058681002
 GameObject:

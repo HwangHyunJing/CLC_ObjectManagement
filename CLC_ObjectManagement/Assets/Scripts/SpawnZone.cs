@@ -22,6 +22,9 @@ public abstract class SpawnZone : PersistableObject
             Random
         }
 
+        // shape factory가 다원화되면서, 이를 각각 받게 되었다
+        public ShapeFactory[] factories;
+
         public MovementDirection movementDirection;
         // shape의 이동 속력
         public FloatRange speed;
@@ -75,9 +78,14 @@ public abstract class SpawnZone : PersistableObject
 
 
     // Game.cs의 CreateShape 코드를 복사, 수정
-    // 값의 configure를 Game.cs가 아니라 여기서 담당
-    public virtual void ConfigureSpawn(Shape shape)
+    // 이제 Game.cs에서 SpawnZone.cs로 본격적으로 이관
+    // public virtual void ConfigureSpawn(Shape shape)
+
+    public virtual Shape SpawnShape()
     {
+        int factoryIndex = Random.Range(0, spawnConfig.factories.Length);
+        Shape shape = spawnConfig.factories[factoryIndex].GetRandom();
+
         Transform t = shape.transform;
 
         // 반지름이 1인 구 범위 내. (getter로 값 받아옴)
@@ -125,5 +133,7 @@ public abstract class SpawnZone : PersistableObject
 
         // 랜덤 방향 대신에 주어진 성분을 사용
         shape.Velocity = direction * spawnConfig.speed.RandomValueInRange;
+
+        return shape;
     }
 }

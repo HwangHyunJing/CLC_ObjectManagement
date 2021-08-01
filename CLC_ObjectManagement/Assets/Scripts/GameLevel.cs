@@ -34,10 +34,10 @@ public class GameLevel : PersistableObject
     }
 
 
-    // Game.cs가 현재의 레벨을 참조해서 호출
-    public void ConfigureSpawn(Shape shape)
+    // Game.cs가 현재의 레벨을 참조해서 호출 >> 타 코드로 이관
+    public Shape SpawnShape()
     {
-        spawnZone.ConfigureSpawn(shape);
+        return spawnZone.SpawnShape();
     }
 
     public override void Save (GameDataWriter writer)

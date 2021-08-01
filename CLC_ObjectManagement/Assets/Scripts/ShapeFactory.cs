@@ -25,6 +25,8 @@ public class ShapeFactory : ScriptableObject
     // 재활용할 물체들을 저장할 별도의 씬
     Scene poolScene;
 
+
+
     // shape id에 해당하는 도형을 가져온다
     public Shape Get(int shapeId = 0, int materialId = 0)
     {
@@ -55,6 +57,7 @@ public class ShapeFactory : ScriptableObject
             else
             {
                 instance = Instantiate(prefabs[shapeId]);
+                instance.OriginFactory = this;
                 instance.ShapeId = shapeId;
 
                 // recycle을 하는 경우, 만든 object를 extra scene으로 옮긴다
@@ -121,6 +124,13 @@ public class ShapeFactory : ScriptableObject
 
     public void Reclaim (Shape shapeToRecycle)
     {
+        // 생성되었던 factory와 재활용되는 factory가 다르면 오류 호출
+        if(shapeToRecycle.OriginFactory != this)
+        {
+            Debug.LogError("Tried to reclaim shape with wrong factory");
+            return;
+        }
+
         if(recycle)
         {
             if(pools == null)

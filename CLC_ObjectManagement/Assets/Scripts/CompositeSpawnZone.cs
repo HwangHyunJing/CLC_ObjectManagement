@@ -46,12 +46,14 @@ public class CompositeSpawnZone : SpawnZone
         }
     }
 
-    public override void ConfigureSpawn(Shape shape)
+    // public override void ConfigureSpawn(Shape shape)
+
+    public override Shape SpawnShape()
     {
         if(overrideConfig)
         {
             // 하나의 configuration을 일괄적으로 받는 경우 (개별 설정의 번거로움 감소)
-            base.ConfigureSpawn(shape);
+            return base.SpawnShape();
         }
         else
         {
@@ -68,7 +70,7 @@ public class CompositeSpawnZone : SpawnZone
             {
                 index = Random.Range(0, spawnZones.Length);
             }
-            spawnZones[index].ConfigureSpawn(shape);
+            return spawnZones[index].SpawnShape();
         }   
     }
 

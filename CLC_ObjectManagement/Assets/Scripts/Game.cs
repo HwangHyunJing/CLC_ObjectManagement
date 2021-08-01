@@ -186,13 +186,14 @@ public class Game : PersistableObject
     // 의미를 확실하게 하기 위해 o 대신 instance로 단어를 변화
     void CreateShape()
     {
-        Shape instance = shapeFactory.GetRandom();
+        // 물체의 생성 자체를 spawn쪽 코드가 직접 리턴 하면서, instance가 필요 없어진다
+        // Shape instance = shapeFactory.GetRandom();
 
-        // 도형의 configure는 SpanwZone.cs로 이관
-        GameLevel.Current.ConfigureSpawn(instance);
+        // GameLevel.Current.ConfigureSpawn(instance);
+        GameLevel.Current.SpawnShape();
 
         // 배열에 추가
-        shapes.Add(instance);
+        shapes.Add(GameLevel.Current.SpawnShape());
     }
 
     // 다시 게임을 시작(Clear 용도)
@@ -217,7 +218,8 @@ public class Game : PersistableObject
         {
             // 다시 가져오는 건 shapeFactory가 주체로 호출할 수 없다
             // Reclaim 기능이 생산이 아니라 기록 로드에 가까워서 그런건가?
-            shapeFactory.Reclaim(shapes[i]);
+            // shapeFactory.Reclaim(shapes[i]);
+            shapes[i].Recycle();
         }
 
         // 배열의 내용은 한번에 정리
@@ -231,7 +233,8 @@ public class Game : PersistableObject
             int index = Random.Range(0, shapes.Count);
             // Destroy(shapes[index].gameObject);
             // 바로 파괴하는 대신, 재활용을 판단 및 처리
-            shapeFactory.Reclaim(shapes[index]);
+            // shapeFactory.Reclaim(shapes[index]);
+            shapes[index].Recycle();
 
             int lastIndex = shapes.Count - 1;
             shapes[index] = shapes[lastIndex];

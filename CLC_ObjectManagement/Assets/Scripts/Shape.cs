@@ -61,6 +61,27 @@ public class Shape : PersistableObject
         }
     }
 
+    // 한 씬에 존재하는 여러 factory중에 자신이 속해있던 factory에 대한 정보
+    public ShapeFactory OriginFactory
+    {
+        get
+        {
+            return originFactory;
+        }
+        set
+        {
+            if (originFactory == null)
+            {
+                originFactory = value;
+            }
+            else
+            {
+                Debug.LogError("Not allowed to change origin factory.");
+            }
+        }
+    }
+
+    ShapeFactory originFactory;
 
     // Shape가 자신의 material 정보를 바꾸는 것을 막기 위해 set을 private으로 설정
     public int MaterialId { get; private set; }
@@ -185,5 +206,12 @@ public class Shape : PersistableObject
                 SetColor(Color.white, i);
             }
         }
+    }
+
+
+    // origin factory에 대한 reclaim 기능
+    public void Recycle()
+    {
+        OriginFactory.Reclaim(this);
     }
 }

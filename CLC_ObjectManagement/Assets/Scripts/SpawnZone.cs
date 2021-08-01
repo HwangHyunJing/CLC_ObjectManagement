@@ -9,22 +9,6 @@ public abstract class SpawnZone : PersistableObject
 
     public abstract Vector3 SpawnPoint { get; }
 
-    /*
-    // spawn zone을 기준으로 shape들이 움직이는 방향에 대한 열거형
-    public enum SpawnMovementDirection
-    {
-        Forward,
-        Upward,
-        Outward,
-        Random
-    }
-    [SerializeField]
-    SpawnMovementDirection spawnMovementDirection;
-
-    // shape가 움직이는 속력에 대한 최소/최대값
-    [SerializeField]
-    FloatRange spawnSpeed;
-    */
 
     // shape의 이동에 대한 데이터를 하나로 묶음
     [System.Serializable]
@@ -47,6 +31,9 @@ public abstract class SpawnZone : PersistableObject
         public FloatRange scale;
 
         public ColorRangeHSV color;
+
+        // 동일한 색상의 도형만을 낼지 결정
+        public bool uniformColor;
     }
 
     [SerializeField]
@@ -100,8 +87,19 @@ public abstract class SpawnZone : PersistableObject
         // Random. Range는 float를 리턴, transform.scale로 쓰려면 Vector를 곱해야 한다
         t.localScale = Vector3.one * spawnConfig.scale.RandomValueInRange;
 
-        // 생성시 임의의 색상을 부여
-        shape.SetColor(spawnConfig.color.RandomInRange);
+        if(spawnConfig.uniformColor)
+        {
+            // 복합체의 경우 동일한 색상을 부여
+            shape.SetColor(spawnConfig.color.RandomInRange);
+        }
+        else
+        {
+            for(int i = 0; i < shape.ColorCount; i++)
+            {
+                shape.SetColor(spawnConfig.color.RandomInRange, i);
+            }
+        }
+        
         // 랜덤한 회전 속도를 부여
         shape.AngularVelocity = 
             Random.onUnitSphere * spawnConfig.angularSpeed.RandomValueInRange;

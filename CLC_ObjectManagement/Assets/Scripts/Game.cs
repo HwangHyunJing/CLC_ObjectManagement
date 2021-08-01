@@ -37,7 +37,7 @@ public class Game : PersistableObject
 
     // 저장 버전
     [SerializeField]
-    const int saveVersion = 4;
+    const int saveVersion = 5;
 
     // Creation의 속도
     public float CreationSpeed { get; set; }

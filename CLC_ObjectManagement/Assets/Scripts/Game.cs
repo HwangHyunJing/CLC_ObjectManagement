@@ -10,7 +10,7 @@ public class Game : PersistableObject
     // 소환할 물체의 정보
     // 이제 PersistableObject형 prefab류 대신, ShapeFactory형 shapes를 사용
     [SerializeField]
-    ShapeFactory shapeFactory;
+    ShapeFactory[] shapeFactories;
 
     // 물체 생성에 해당하는 키 코드
     public KeyCode createKey = KeyCode.C;
@@ -75,8 +75,15 @@ public class Game : PersistableObject
 
     private void OnEnable()
     {
-        // Unity의 editor는 Instance를 자동으로 켜주지 않기 때문
-        // Instance = this;
+        // hot reload 직후 on enabled가 다시 호출되면서 id가 갱신되는 현상을 막음
+        if(shapeFactories[0].FactoryId != 0)
+        {
+            for (int i = 0; i < shapeFactories.Length; i++)
+            {
+                shapeFactories[i].FactoryId = i;
+            }
+        }
+        
     }
 
     private void Start()
@@ -266,6 +273,7 @@ public class Game : PersistableObject
 
         for(int i=0; i < shapes.Count; i++)
         {
+            writer.Write(shapes[i].OriginFactory.FactoryId);
             // 해당 도형의 shape id 정보를 기록
             writer.Write(shapes[i].ShapeId);
 
@@ -334,9 +342,10 @@ public class Game : PersistableObject
 
         for (int i = 0; i < count; i++)
         {
+            int factoryId = version >= 5 ? reader.ReadInt() : 0;
             int shapeId = version > 0 ? reader.ReadInt() : 0;
             int materialId = version > 0 ? reader.ReadInt() : 0;
-            Shape instance = shapeFactory.Get(shapeId, materialId);
+            Shape instance = shapeFactories[factoryId].Get(shapeId, materialId);
             instance.Load(reader);
             shapes.Add(instance);
         }

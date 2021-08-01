@@ -1213,7 +1213,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8af33bdb9634c2d48b02604f046f6680, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shapeFactory: {fileID: 11400000, guid: 622f46f1685c1f84e8b64bb0b63ec87a, type: 2}
+  shapeFactories:
+  - {fileID: 11400000, guid: d0f9ab436ace68944956c6a711f812f0, type: 2}
+  - {fileID: 11400000, guid: f2588398b656a834e991c6766712458e, type: 2}
   createKey: 99
   destroyKey: 120
   newGameKey: 110

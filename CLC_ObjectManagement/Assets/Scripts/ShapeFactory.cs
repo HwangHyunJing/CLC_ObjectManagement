@@ -25,7 +25,31 @@ public class ShapeFactory : ScriptableObject
     // 재활용할 물체들을 저장할 별도의 씬
     Scene poolScene;
 
+    // 각 shape가 factory를 찾을 때 사용할 ID (factory 자체를 저장할 수는 없으므로)
+    public int FactoryId
+    {
+        get
+        {
+            return factoryId;
+        }
 
+        set
+        {
+            if(FactoryId == int.MinValue && value != int.MinValue)
+            {
+                factoryId = value;
+            }
+            else
+            {
+                Debug.Log("Not allowed to change factoryId.");
+            }
+        }
+    }
+
+    // inspectory상에서의 직렬화를 막음
+    // unity의 기준에 따라 scriptable obj의 정보는 저장되지 않지만, 정작 각 obj
+    [System.NonSerialized]
+    int factoryId = int.MinValue;
 
     // shape id에 해당하는 도형을 가져온다
     public Shape Get(int shapeId = 0, int materialId = 0)

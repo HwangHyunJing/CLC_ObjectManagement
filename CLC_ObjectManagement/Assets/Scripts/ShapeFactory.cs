@@ -35,7 +35,8 @@ public class ShapeFactory : ScriptableObject
 
         set
         {
-            if(FactoryId == int.MinValue && value != int.MinValue)
+            // 부여된 factory 값이 없다면, value를 부여
+            if(factoryId == int.MinValue && value != int.MinValue)
             {
                 factoryId = value;
             }
@@ -49,7 +50,7 @@ public class ShapeFactory : ScriptableObject
     // inspectory상에서의 직렬화를 막음
     // unity의 기준에 따라 scriptable obj의 정보는 저장되지 않지만, 정작 각 obj
     [System.NonSerialized]
-    int factoryId = int.MinValue;
+    int factoryId = int.MinValue;   // MinValue는 설정값이 없는 null로 생각
 
     // shape id에 해당하는 도형을 가져온다
     public Shape Get(int shapeId = 0, int materialId = 0)

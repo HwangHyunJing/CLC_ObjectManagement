@@ -107,32 +107,48 @@ public abstract class SpawnZone : PersistableObject
                 shape.SetColor(spawnConfig.color.RandomInRange, i);
             }
         }
-        
-        // 랜덤한 회전 속도를 부여
-        shape.AngularVelocity = 
-            Random.onUnitSphere * spawnConfig.angularSpeed.RandomValueInRange;
 
-        //
-        Vector3 direction;
-
-        switch(spawnConfig.movementDirection)
+        float angularSpeed = spawnConfig.angularSpeed.RandomValueInRange;
+        if(angularSpeed != 0f)
         {
-            case SpawnConfiguration.MovementDirection.Upward:
-                direction = transform.up;
-                break;
-            case SpawnConfiguration.MovementDirection.Outward:
-                direction = (t.localPosition - transform.position).normalized;
-                break;
-            case SpawnConfiguration.MovementDirection.Random:
-                direction = Random.onUnitSphere;
-                break;
-            default:
-                direction = transform.forward;
-                break;
+            // 제너릭 Add Behavior
+            // 회전에 대한 스크립트 객체를 넘김
+            var rotation = shape.AddBehavior<RotationShapeBehavior>();
+            // 랜덤한 회전 속도를 부여
+            rotation.AngularVelocity =
+                Random.onUnitSphere * angularSpeed;
         }
 
-        // 랜덤 방향 대신에 주어진 성분을 사용
-        shape.Velocity = direction * spawnConfig.speed.RandomValueInRange;
+        //
+        
+
+        float speed = spawnConfig.speed.RandomValueInRange;
+        if(speed != 0f)
+        {
+            Vector3 direction;
+
+            switch (spawnConfig.movementDirection)
+            {
+                case SpawnConfiguration.MovementDirection.Upward:
+                    direction = transform.up;
+                    break;
+                case SpawnConfiguration.MovementDirection.Outward:
+                    direction = (t.localPosition - transform.position).normalized;
+                    break;
+                case SpawnConfiguration.MovementDirection.Random:
+                    direction = Random.onUnitSphere;
+                    break;
+                default:
+                    direction = transform.forward;
+                    break;
+            }
+
+            // 제너릭 Add Behavior
+            var movement = shape.AddBehavior<MovementShapeBehavior>();
+            // 랜덤 방향 대신에 주어진 성분을 사용
+            movement.Velocity = direction * speed;
+        }
+
 
         return shape;
     }

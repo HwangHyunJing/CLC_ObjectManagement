@@ -247,7 +247,8 @@ public class Shape : PersistableObject
         // Add Behavior의 Add Component로 인한 스크립트 덤핑을 막기 위함
         for(int i=0; i < behaviorList.Count; i++)
         {
-            Destroy(behaviorList[i]);
+            // Destroy(behaviorList[i]);
+            behaviorList[i].Recycle();
         }
         behaviorList.Clear();
 
@@ -256,9 +257,10 @@ public class Shape : PersistableObject
 
     // 새로운 행동을 추가하는 메소드 (제너릭)
     // T는 shape behavior이므로, 반드시 shape behavior를 상속하는 형에 대해서만 작동해야 한다
-    public T AddBehavior<T>() where T : ShapeBehavior
+    public T AddBehavior<T>() where T : ShapeBehavior, new()
     {
-        T behavior = gameObject.AddComponent<T>();
+        // T behavior = gameObject.AddComponent<T>();
+        T behavior = ShapeBehaviorPool<T>.Get();
         behaviorList.Add(behavior);
         return behavior;
     }

@@ -119,8 +119,6 @@ public abstract class SpawnZone : PersistableObject
                 Random.onUnitSphere * angularSpeed;
         }
 
-        //
-        
 
         float speed = spawnConfig.speed.RandomValueInRange;
         if(speed != 0f)

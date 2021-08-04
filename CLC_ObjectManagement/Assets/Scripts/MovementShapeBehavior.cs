@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovementShapeBehavior : ShapeBehavior
+public sealed class MovementShapeBehavior : ShapeBehavior
 {
     public Vector3 Velocity { get; set; }
 
@@ -17,6 +17,11 @@ public class MovementShapeBehavior : ShapeBehavior
     public override void GameUpdate(Shape shape)
     {
         shape.transform.localPosition += Velocity * Time.deltaTime;
+    }
+
+    public override void Recycle()
+    {
+        ShapeBehaviorPool<MovementShapeBehavior>.Reclaim(this);
     }
 
     public override void Save(GameDataWriter writer)

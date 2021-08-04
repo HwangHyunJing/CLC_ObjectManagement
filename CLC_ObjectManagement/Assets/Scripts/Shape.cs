@@ -176,7 +176,11 @@ public class Shape : PersistableObject
             int behaviorCount = reader.ReadInt();
             for(int i = 0; i < behaviorCount; i++)
             {
-                AddBehavior((ShapeBehavior.ShapeBehaviorType)reader.ReadInt()).Load(reader);
+                // AddBehavior((ShapeBehavior.ShapeBehaviorType)reader.ReadInt()).Load(reader);
+                ShapeBehavior behavior =
+                    ((ShapeBehavior.ShapeBehaviorType)reader.ReadInt()).GetInstance();
+                behaviorList.Add(behavior);
+                behavior.Load();
             }
         }
         // 그 이전 버전의 경우(4, 5) 기존 방식대로 벡터 자체를 읽어온다
@@ -265,6 +269,7 @@ public class Shape : PersistableObject
         return behavior;
     }
 
+    /*
     private ShapeBehavior AddBehavior (ShapeBehavior.ShapeBehaviorType type)
     {
         switch(type)
@@ -279,4 +284,5 @@ public class Shape : PersistableObject
         Debug.LogError("Forgor to support");
         return null;
     }
+    */
 }

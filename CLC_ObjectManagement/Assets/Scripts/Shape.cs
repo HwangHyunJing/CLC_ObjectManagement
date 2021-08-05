@@ -178,9 +178,9 @@ public class Shape : PersistableObject
             {
                 // AddBehavior((ShapeBehavior.ShapeBehaviorType)reader.ReadInt()).Load(reader);
                 ShapeBehavior behavior =
-                    ((ShapeBehavior.ShapeBehaviorType)reader.ReadInt()).GetInstance();
+                    ((ShapeBehaviorType)reader.ReadInt()).GetInstance();
                 behaviorList.Add(behavior);
-                behavior.Load();
+                behavior.Load(reader);
             }
         }
         // 그 이전 버전의 경우(4, 5) 기존 방식대로 벡터 자체를 읽어온다

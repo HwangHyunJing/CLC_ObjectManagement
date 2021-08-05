@@ -21,7 +21,7 @@ public class OscillationShapeBehavior : ShapeBehavior
     public override void GameUpdate(Shape shape)
     {
         // 쉽게 말해서 2 파이 R (주파수 X 시간 = 파장; 이동 거리; 반지름)
-        float oscillation = Mathf.Sin(2f * Mathf.PI * Frequency * Time.time);
+        float oscillation = Mathf.Sin(2f * Mathf.PI * Frequency * shape.Age);
         shape.transform.localPosition +=
             (oscillation - previousOscillation) * Offset;
         previousOscillation = oscillation;

@@ -27,7 +27,8 @@ public class Shape : PersistableObject
 
     List<ShapeBehavior> behaviorList = new List<ShapeBehavior>();
 
-
+    // 진동이 얼마나 진행되었는지에 대한 정보
+    public float Age { get; set; }
 
     private void Awake()
     {
@@ -36,13 +37,11 @@ public class Shape : PersistableObject
         colors = new Color[meshRenderers.Length];
     }
 
-    // 별도의 스크립트에서 담당하면서 해당 데이터를 필요 없어짐
-    // public Vector3 AngularVelocity { get; set; }
-    // public Vector3 Velocity { get; set; }
-    
-    // private void FixedUpdate()
     public void GameUpdate()
     {
+        // 시작 후부터 나이를 더함
+        Age += Time.deltaTime;
+
         // behavior 목록만큼 행동을 하도록 함
         for(int i = 0; i < behaviorList.Count; i++)
         {
@@ -142,6 +141,7 @@ public class Shape : PersistableObject
         // writer.Write(AngularVelocity);
         // writer.Write(Velocity);
 
+        writer.Write(Age);
         // 저장된 행동의 수를 우선 읽고
         writer.Write(behaviorList.Count);
         for(int i = 0; i < behaviorList.Count; i++)
@@ -166,13 +166,11 @@ public class Shape : PersistableObject
         {
             SetColor(reader.Version > 0 ? reader.ReadColor() : Color.white);
         }
- 
-        // AngularVelocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
-        // Velocity = reader.Version >= 4 ? reader.ReadVector3() : Vector3.zero;
         
         // 6 이상의 버전에서는 각 shape의 행동 양식을 저장
         if(reader.Version >= 6)
         {
+            Age = reader.ReadFloat();
             int behaviorCount = reader.ReadInt();
             for(int i = 0; i < behaviorCount; i++)
             {
@@ -248,6 +246,8 @@ public class Shape : PersistableObject
     // origin factory에 대한 reclaim 기능
     public void Recycle()
     {
+        Age = 0f;
+
         // Add Behavior의 Add Component로 인한 스크립트 덤핑을 막기 위함
         for(int i=0; i < behaviorList.Count; i++)
         {

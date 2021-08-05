@@ -37,6 +37,13 @@ public abstract class SpawnZone : PersistableObject
 
         // 동일한 색상의 도형만을 낼지 결정
         public bool uniformColor;
+
+        // 진동의 진행 방향
+        public MovementDirection oscillationDirection;
+        // 진폭
+        public FloatRange oscillationAmplitude;
+        // 진동수
+        public FloatRange oscillationFrequency;
     }
 
     [SerializeField]
@@ -123,31 +130,46 @@ public abstract class SpawnZone : PersistableObject
         float speed = spawnConfig.speed.RandomValueInRange;
         if(speed != 0f)
         {
-            Vector3 direction;
-
-            switch (spawnConfig.movementDirection)
-            {
-                case SpawnConfiguration.MovementDirection.Upward:
-                    direction = transform.up;
-                    break;
-                case SpawnConfiguration.MovementDirection.Outward:
-                    direction = (t.localPosition - transform.position).normalized;
-                    break;
-                case SpawnConfiguration.MovementDirection.Random:
-                    direction = Random.onUnitSphere;
-                    break;
-                default:
-                    direction = transform.forward;
-                    break;
-            }
-
             // 제너릭 Add Behavior
             var movement = shape.AddBehavior<MovementShapeBehavior>();
             // 랜덤 방향 대신에 주어진 성분을 사용
-            movement.Velocity = direction * speed;
+            movement.Velocity =
+                GetDirectionVector(spawnConfig.movementDirection, t) * speed;
         }
 
+        SetupOscillation(shape);
 
         return shape;
+    }
+
+    // direction 기반으로 구하던 속도의 방향을 별도의 메서드에서 구함
+    Vector3 GetDirectionVector(
+        SpawnConfiguration.MovementDirection direction, Transform t)
+    {
+        switch (direction)
+        {
+            case SpawnConfiguration.MovementDirection.Upward:
+                return transform.up;
+            case SpawnConfiguration.MovementDirection.Outward:
+                return (t.localPosition - transform.position).normalized;
+            case SpawnConfiguration.MovementDirection.Random:
+                return Random.onUnitSphere;
+            default:
+                return transform.forward;
+        }
+    }
+
+    void SetupOscillation (Shape shape)
+    {
+        float amplitude = spawnConfig.oscillationAmplitude.RandomValueInRange;
+        float frequency = spawnConfig.oscillationFrequency.RandomValueInRange;
+        if(amplitude == 0f || frequency == 0f)
+        {
+            return;
+        }
+        var oscillation = shape.AddBehavior<OscillationShapeBehavior>();
+        oscillation.Offset = GetDirectionVector(
+            spawnConfig.oscillationDirection, shape.transform) * amplitude;
+        oscillation.Frequency = frequency;
     }
 }

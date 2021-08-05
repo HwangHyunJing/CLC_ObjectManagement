@@ -73,6 +73,7 @@ public class Game : PersistableObject
 
     // public static Game Instance { get; private set; }
 
+
     private void OnEnable()
     {
         // hot reload 직후 on enabled가 다시 호출되면서 id가 갱신되는 현상을 막음
